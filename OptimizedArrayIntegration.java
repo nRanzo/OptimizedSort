@@ -1,22 +1,24 @@
 import java.util.Arrays;
 
 /**
- * The OptimizedArrayIntegration class provides a method to efficiently 
- * integrate a small number of unsorted elements into a larger, pre-sorted array.
- * This approach uses binary search to find the correct insertion point for 
- * the new data and then sorts the relevant portion of the array. 
+ * The OptimizedArrayIntegration class implements a method to efficiently integrate 
+ * a small number of unsorted elements into a larger, pre-sorted array. The approach 
+ * uses binary search to determine the correct insertion point for the new data 
+ * and then performs localized sorting, minimizing the need for re-sorting the 
+ * entire array.
  * 
- * <p>This technique is particularly advantageous when dealing with incremental 
- * data updates where re-sorting the entire array would be inefficient.</p>
+ * <p>This method is particularly useful in scenarios where new data arrives 
+ * incrementally, and frequent updates to a large, sorted dataset are required.</p>
  */
 public class OptimizedArrayIntegration {
 
     /**
-     * Integrates the new unsorted elements into the pre-sorted portion of the 
-     * array using a binary search and localized sorting strategy.
+     * Integrates a small, unsorted array of new elements into a larger, pre-sorted array.
+     * The method identifies the appropriate insertion point for the new elements 
+     * using binary search and then sorts the affected portion of the array.
      * 
-     * @param sortedArr the array containing the pre-sorted elements
-     * @param newElements the new unsorted elements to be integrated
+     * @param sortedArr the pre-sorted array of elements
+     * @param newElements the unsorted array of new elements to be integrated
      */
     public static void integrateAndSort(int[] sortedArr, int[] newElements) {
         // Edge case: If there are no new elements, return as no sorting is needed.
@@ -24,40 +26,43 @@ public class OptimizedArrayIntegration {
             return;
         }
 
-        // Identify the minimum element in the new elements.
+        // Step 1: Identify the minimum element in the new elements array.
         int minNewElement = Arrays.stream(newElements).min().getAsInt();
 
-        // Find the insertion index for this minimum element using binary search.
+        // Step 2: Perform a binary search on the sorted portion to find the insertion index.
         int insertionIndex = binarySearch(sortedArr, 0, sortedArr.length - 1, minNewElement);
 
-        // Combine the old sorted elements and new unsorted elements into one array.
-        int[] combinedArray = Arrays.copyOfRange(sortedArr, 0, sortedArr.length + newElements.length);
+        // Step 3: Combine the sorted array and new elements into one array.
+        int[] combinedArray = Arrays.copyOf(sortedArr, sortedArr.length + newElements.length);
         System.arraycopy(newElements, 0, combinedArray, sortedArr.length, newElements.length);
 
-        // Sort the relevant portion of the array.
+        // Step 4: Sort only the portion of the array from the insertion index to the end.
         Arrays.sort(combinedArray, insertionIndex, combinedArray.length);
 
         // Display the integrated and sorted array.
-        System.out.println(Arrays.toString(combinedArray));
+        System.out.println("Integrated and Sorted Array: " + Arrays.toString(combinedArray));
     }
 
     /**
-     * Performs a binary search to determine the index at which the target 
-     * element would be inserted in the sorted array.
-     *
+     * Performs a binary search on the sorted array to find the index where the target element
+     * should be inserted. The search is limited to the range between low and high indices.
+     * 
      * @param arr the sorted array
      * @param low the lower bound of the search range
      * @param high the upper bound of the search range
-     * @param target the element whose insertion point is to be determined
-     * @return the index at which the target element should be inserted
+     * @param target the element whose insertion point is to be found
+     * @return the index where the target element should be inserted
      */
     private static int binarySearch(int[] arr, int low, int high, int target) {
+        // Base case: when the search range is reduced to one element
         if (low >= high) {
             return (arr[low] < target) ? low + 1 : low;
         }
 
+        // Calculate the midpoint of the current search range.
         int mid = low + (high - low) / 2;
 
+        // Recursive search to find the correct insertion index.
         if (arr[mid] == target) {
             return mid;
         } else if (arr[mid] < target) {
@@ -69,14 +74,31 @@ public class OptimizedArrayIntegration {
 
     /**
      * Main method for testing the OptimizedArrayIntegration class.
-     * Demonstrates the integration of new elements into a pre-sorted array.
-     *
+     * Demonstrates the integration of new unsorted elements into a pre-sorted array.
+     * 
+     * <p>Examples:</p>
+     * <ul>
+     *   <li>Example 1: Integrating new elements into a small sorted array.</li>
+     *   <li>Example 2: Integrating elements into a larger dataset.</li>
+     * </ul>
+     * 
      * @param args command-line arguments (not used)
      */
     public static void main(String[] args) {
-        int[] sortedArr = {1, 3, 5, 7, 9, 11, 13, 15, 17, 19};
-        int[] newElements = {8, 4, 14, 2};
+        // Example 1: Small sorted array with new elements
+        int[] sortedArr1 = {1, 3, 5, 7, 9, 11, 13};
+        int[] newElements1 = {4, 8, 2};
 
-        integrateAndSort(sortedArr, newElements);
+        System.out.println("Original Sorted Array 1: " + Arrays.toString(sortedArr1));
+        System.out.println("New Elements 1: " + Arrays.toString(newElements1));
+        integrateAndSort(sortedArr1, newElements1);
+
+        // Example 2: Larger sorted array with additional elements
+        int[] sortedArr2 = {10, 20, 30, 40, 50, 60, 70, 80};
+        int[] newElements2 = {25, 35, 5};
+
+        System.out.println("\nOriginal Sorted Array 2: " + Arrays.toString(sortedArr2));
+        System.out.println("New Elements 2: " + Arrays.toString(newElements2));
+        integrateAndSort(sortedArr2, newElements2);
     }
 }
